@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة إدارة الأدمن</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .admin-panel {
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .admin-panel h1 {
+            font-size: 2em;
+            color: #6a1b9a;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .member-list {
+            margin-bottom: 20px;
+        }
+        .member-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .member-list ul li {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+        }
+        .member-list ul li img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .member-list ul li .actions {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+        .member-list ul li .actions button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+        }
+        .member-list ul li .actions button.muted {
+            background-color: #f44336;
+        }
+        .member-list ul li .actions button.muted:hover {
+            background-color: #e53935;
+        }
+        .member-list ul li .actions button.banned {
+            background-color: #ff9800;
+        }
+        .member-list ul li .actions button.banned:hover {
+            background-color: #fb8c00;
+        }
+        .member-list ul li .actions button.monitor {
+            background-color: #ff5722;
+        }
+        .member-list ul li .actions button.monitor:hover {
+            background-color: #e64a19;
+        }
+        .member-list ul li .actions button.promotion {
+            background-color: #9c27b0;
+        }
+        .member-list ul li .actions button.promotion:hover {
+            background-color: #7b1fa2;
+        }
+        .member-list ul li .actions button.demote {
+            background-color: #2196f3;
+        }
+        .member-list ul li .actions button.demote:hover {
+            background-color: #1976d2;
+        }
+        .promotion-badge {
+            margin-left: 5px;
+            font-size: 1.2em;
+            color: #f44336;
+        }
+        .promotion-badge.fire {
+            color: #f44336;
+        }
+        .admin-name {
+            color: #6a1b9a;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .new-member {
+            color: #ff5722;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <h1>لوحة إدارة الأدمن</h1>
+        <div class="member-list">
+            <ul id="member-list">
+                <!-- قائمة الأعضاء هنا -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // بيانات الأعضاء
+        let members = [
+            { name: 'أحمد', image: 'https://via.placeholder.com/30', isAdmin: false, isMuted: false, isBanned: false, isMonitor: false },
+            { name: 'فاطمة', image: 'https://via.placeholder.com/30', isAdmin: false, isMuted: false, isBanned: false, isMonitor: false },
+            { name: 'علي', image: 'https://via.placeholder.com/30', isAdmin: false, isMuted: false, isBanned: false, isMonitor: false },
+            { name: 'سارة', image: 'https://via.placeholder.com/30', isAdmin: false, isMuted: false, isBanned: false, isMonitor: false },
+            { name: 'محمود', image: 'https://via.placeholder.com/30', isAdmin: false, isMuted: false, isBanned: false, isMonitor: false },
+            { name: 'ليلى', image: 'https://via.placeholder.com/30', isAdmin: false, isMuted: false, isBanned: false, isMonitor: false },
+            // أضف أعضاء وهميين آخرين هنا
+        ];
+
+        let isAdmin = true; // هنا يجب التحقق من صلاحيات الأدمن
+
+        // تحديث قائمة الأعضاء
+        function updateMembersList() {
+            const memberList = document.getElementById('member-list');
+            memberList.innerHTML = '';
+
+            members.forEach(member => {
+                const li = document.createElement('li');
+                li.innerHTML = `<img src="${member.image}" alt="${member.name}" width="30" height="30">
+                                <span class="${member.isAdmin ? 'admin-name' : ''}">${member.name}</span>
+                                ${member.isMonitor ? '<span class="promotion-badge fire">🔥</span>' : ''}
+                                <div class="actions">
+                                    ${!member.isAdmin ? (member.isMuted ? `<button onclick="unmuteMember('${member.name}')" class="muted">فتح الكتم</button>` : `<button onclick="muteMember('${member.name}')" class="muted">كتم</button>`) : ''}
+                                    ${!member.isAdmin && !member.isBanned ? `<button onclick="banMember('${member.name}')" class="banned">طرد</button>` : ''}
+                                    ${!member.isAdmin && !member.isMonitor ? `<button onclick="promoteToMonitor('${member.name}')" class="monitor">ترقية إلى مراقب</button>` : ''}
+                                    ${!member.isAdmin ? `<button onclick="promoteToAdmin('${member.name}')" class="promotion">ترقية إلى أدمن</button>` : ''}
+                                    ${member.isAdmin ? `<button onclick="demoteToMonitor('${member.name}')" class="demote">تنزيل إلى مراقب</button>` : ''}
+                                    ${member.isMonitor ? `<button onclick="demoteToMember('${member.name}')" class="demote">تنزيل إلى عضو</button>` : ''}
+                                </div>`;
+                memberList.appendChild(li);
+            });
+        }
+
+        // إضافة عضو جديد إلى القائمة
+        function addNewMember(name, image) {
+            members.push({
+                name: name,
+                image: image,
+                isAdmin: false,
+                isMuted: false,
+                isBanned: false,
+                isMonitor: false
+            });
+            updateMembersList();
+        }
+
+        // كتم العضو
+        function muteMember(memberName) {
+            const member = members.find(m => m.name === memberName);
+            if (member) {
+                member.isMuted = true;
+                updateMembersList();
+            }
+        }
+
+        // فتح كتم العضو
+        function unmuteMember(memberName) {
+            const member = members.find(m => m.name === memberName);
+            if (member) {
+                member.isMuted = false;
+                updateMembersList();
+            }
+        }
+
+        // حظر العضو
+        function banMember(memberName) {
+            const member = members.find(m => m.name === memberName);
+            if (member) {
+                member.isBanned = true;
+                updateMembersList();
+            }
+        }
+
+        // ترقية العضو إلى مراقب
+        function promoteToMonitor(memberName) {
+            const member = members.find(m => m.name === memberName);
+            if (member) {
+                member.isMonitor = true;
+                member.isAdmin = false;
+                updateMembersList();
+            }
+        }
+
+        // ترقية العضو إلى أدمن
+        function promoteToAdmin(memberName) {
+            const member = members.find(m => m.name === memberName);
+            if (member) {
+                member.isAdmin = true;
+                member.isMonitor = false;
+                updateMembersList();
+            }
+        }
+
+        // تنزيل العضو إلى مراقب
+        function demoteToMonitor(memberName) {
+            const member = members.find(m => m.name === memberName);
+            if (member) {
+                member.isMonitor = true;
+                member.isAdmin = false;
+                updateMembersList();
+            }
+        }
+
+        // تنزيل العضو إلى عضو عادي
+        function demoteToMember(memberName) {
+            const member = members.find(m => m.name === memberName);
+            if (member) {
+                member.isMonitor = false;
+                updateMembersList();
+            }
+        }
+
+        // تهيئة الصفحة
+        window.onload = () => {
+            if (isAdmin) {
+                updateMembersList();
+            } else {
+                alert('لا تملك صلاحيات الأدمن');
+            }
+        };
+
+        // مثال لإضافة عضو جديد عند دخول الدردشة
+        addNewMember('جديد', 'https://via.placeholder.com/30');
+    </script>
+</body>
+</html>

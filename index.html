@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دردشة عشقي وحبيبي</title> 
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .chat-container {
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+        }
+        .rooms {
+            display: flex;
+            flex-direction: column;
+            background-color: #007BFF;
+            padding: 10px;
+            width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .rooms button {
+            background-color: #fff;
+            color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        .rooms button:hover {
+            background-color: #0056b3;
+            color: #fff;
+        }
+        .chat-box {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            background: #fff;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+        }
+        .header .admin-star {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            font-size: 20px;
+            color: gold;
+        }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .message img {
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .message p {
+            margin: 0;
+        }
+        .footer {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        .footer input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .footer button {
+            padding: 10px 15px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        .footer button:hover {
+            background-color: #0056b3;
+        }
+        .emojis-button {
+            padding: 10px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        .emojis-button:hover {
+            background-color: #0056b3;
+        }
+        .emojis {
+            display: none;
+            position: absolute;
+            bottom: 50px;
+            right: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .emoji {
+            font-size: 20px;
+            margin: 2px;
+            cursor: pointer;
+        }
+        .sidebar {
+            flex: 1;
+            border: 1px solid #ddd;
+            background: #fff;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+        .sidebar h2 {
+            margin-top: 0;
+        }
+        .members-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .members-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+        .members-list img {
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .admin-badge {
+            color: gold;
+            margin-left: 5px;
+        }
+        .admin-name {
+            font-weight: bold;
+            color: #32CD32; /* لون أخضر فسفوري مشع */
+        }
+        .modal, .edit-modal, .private-chat-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content, .edit-modal-content, .private-chat-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #image-preview {
+            width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>تسجيل اسمك المستعار</h2>
+            <input type="text" id="nickname" placeholder="ادخل اسمك المستعار">
+            <button onclick="setNickname()">تسجيل</button>
+            <div style="margin-top: 20px;">
+                <h3>تسجيل دخول الأدمن</h3>
+                <input type="password" id="admin-password" placeholder="كلمة مرور الأدمن">
+                <button onclick="adminLogin()">تسجيل دخول</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2>تعديل العضو</h2>
+            <input type="text" id="edit-nickname" placeholder="تعديل الاسم">
+            <input type="file" id="edit-image" accept="image/*" onchange="previewImage(event)">
+            <img id="image-preview" src="" alt="معاينة الصورة">
+            <button onclick="saveEdit()">حفظ التعديلات</button>
+            <button onclick="promoteToAdmin()">ترقية إلى أدمن</button>
+            <button onclick="sendPrivateMessage()">إرسال رسالة خاصة</button>
+        </div>
+    </div>
+
+    <!-- Private Chat Modal -->
+    <div id="privateChatModal" class="private-chat-modal">
+        <div class="private-chat-content">
+            <span class="close" onclick="closePrivateChatModal()">&times;</span>
+            <h2>محادثة خاصة مع <span id="private-chat-username"></span></h2>
+            <div class="private-messages" id="private-messages" style="border: 1px solid #ddd; padding: 10px; height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
+            <input type="text" id="private-message-input" placeholder="اكتب رسالة خاصة...">
+            <button onclick="sendPrivateMessageToUser()">إرسال</button>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <!-- Sidebar with Rooms -->
+        <div class="rooms">
+            <button onclick="switchRoom('العراق 🇮🇶')">غرفة العراق 🇮🇶</button>
+            <button onclick="switchRoom('السعودية 🇸🇦')">غرفة السعودية 🇸🇦</button>
+            <button onclick="switchRoom('مصر 🇪🇬')">غرفة مصر 🇪🇬</button>
+            <button onclick="switchRoom('سوريا 🇸🇾')">غرفة سوريا 🇸🇾</button>
+        </div>
+
+        <!-- Chat Box -->
+        <div class="chat-box">
+            <div class="header">
+                دردشة عشقي وحبيبي <span id="admin-star" class="admin-star">⭐</span>
+            </div>
+            <div class="messages" id="messages">
+                <!-- رسائل الدردشة -->
+            </div>
+            <div class="footer">
+                <input type="text" id="message-input" placeholder="اكتب رسالة...">
+                <button onclick="sendMessage()">إرسال</button>
+                <button class="emojis-button" onclick="toggleEmojis()">😊</button>
+                <div id="emojis" class="emojis">
+                    <span class="emoji" onclick="selectEmoji('😊')">😊</span>
+                    <span class="emoji" onclick="selectEmoji('😂')">😂</span>
+                    <span class="emoji" onclick="selectEmoji('😍')">😍</span>
+                    <span class="emoji" onclick="selectEmoji('😢')">😢</span>
+                    <span class="emoji" onclick="selectEmoji('😜')">😜</span>
+                    <span class="emoji" onclick="selectEmoji('😡')">😡</span>
+                    <span class="emoji" onclick="selectEmoji('🥳')">🥳</span>
+                    <span class="emoji" onclick="selectEmoji('🤔')">🤔</span>
+                    <!-- أضف المزيد من الرموز التعبيرية هنا -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>الأعضاء</h2>
+            <ul class="members-list" id="members-list">
+                <!-- قائمة الأعضاء الوهميين -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // إضافة أعضاء وهميين
+        let members = [
+            { name: 'أحمد', image: 'https://via.placeholder.com/30', isAdmin: false },
+            { name: 'فاطمة', image: 'https://via.placeholder.com/30', isAdmin: false },
+            { name: 'محمد', image: 'https://via.placeholder.com/30', isAdmin: false },
+            { name: 'نور', image: 'https://via.placeholder.com/30', isAdmin: false },
+            { name: 'علي', image: 'https://via.placeholder.com/30', isAdmin: false },
+            // ... أضف باقي الأعضاء هنا ...
+        ];
+
+        const membersList = document.getElementById('members-list');
+        const currentUser = localStorage.getItem('nickname');
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+        // إضافة الأعضاء الوهميين إلى القائمة
+        function updateMembersList() {
+            membersList.innerHTML = '';
+
+            // ترتيب الأعضاء
+            const sortedMembers = [...members].sort((a, b) => {
+                if (a.isAdmin && !b.isAdmin) return -1;
+                if (!a.isAdmin && b.isAdmin) return 1;
+                return a.name.localeCompare(b.name);
+            });
+
+            // إضافة الأعضاء إلى القائمة
+            sortedMembers.forEach(member => {
+                const li = document.createElement('li');
+                li.innerHTML = `<img src="${member.image}" alt="${member.name}"> <span class="${member.isAdmin ? 'admin-name' : ''}">${member.name}</span>`;
+                if (member.isAdmin) {
+                    li.innerHTML += ' <span class="admin-badge">💎</span>';
+                }
+                li.onclick = () => openEditModal(member);
+                membersList.appendChild(li);
+            });
+
+            // إضافة اسم المستخدم الحالي إلى القائمة
+            if (currentUser) {
+                const currentUserLi = document.createElement('li');
+                currentUserLi.innerHTML = `<img src="https://via.placeholder.com/30" alt="${currentUser}"> <span class="${isAdmin ? 'admin-name' : ''}">${currentUser}</span>`;
+                if (isAdmin) {
+                    currentUserLi.innerHTML += ' <span class="admin-badge">⭐</span>';
+                }
+                currentUserLi.onclick = () => openEditModal({ name: currentUser, image: 'https://via.placeholder.com/30', isAdmin });
+                membersList.insertBefore(currentUserLi, membersList.firstChild);
+            }
+        }
+
+        // إرسال رسالة
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const messages = document.getElementById('messages');
+            if (input.value.trim() === '') return;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.innerHTML = `<img src="https://via.placeholder.com/30" alt="${currentUser}"><p><strong>${currentUser}:</strong> ${input.value}</p>`;
+            messages.appendChild(messageDiv);
+
+            // عبارات الردود
+            const replies = [
+                'نورت',
+                'عليكم السلام',
+                'اهلا وسهلا',
+                'كل الهلا يعمري نورتنا',
+                'شلونك',
+                'اخبارك',
+                'شكو ماكو',
+                'شسمك',
+                'من وين انت'
+            ];
+
+            // تفاعل الأعضاء الوهميين مع الرسالة
+            setTimeout(() => {
+                const randomMember = members[Math.floor(Math.random() * members.length)];
+                const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                const replyDiv = document.createElement('div');
+                replyDiv.classList.add('message');
+                replyDiv.innerHTML = `<img src="${randomMember.image}" alt="${randomMember.name}"><p><strong>${randomMember.name}:</strong> ${randomReply}</p>`;
+                messages.appendChild(replyDiv);
+                messages.scrollTop = messages.scrollHeight; // تمرير الرسائل إلى الأسفل
+            }, Math.random() * 3000 + 1000); // الرد بعد فترة عشوائية بين 1-4 ثواني
+
+            // تنظيف الحقل النصي بعد الإرسال
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight; // تمرير الرسائل إلى الأسفل
+        }
+
+        // عرض النافذة المنبثقة
+        window.onload = function() {
+            const nickname = localStorage.getItem('nickname');
+            if (nickname) {
+                document.querySelector('.header').innerHTML = `دردشة عشقي وحبيبي <span id="admin-star" class="admin-star">⭐</span>`;
+                if (localStorage.getItem('isAdmin') === 'true') {
+                    document.getElementById('admin-star').style.display = 'inline';
+                }
+                updateMembersList();
+            } else {
+                document.getElementById('myModal').style.display = 'block';
+            }
+        };
+
+        // إغلاق النافذة المنبثقة
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        // تسجيل الاسم المستعار
+        function setNickname() {
+            const nickname = document.getElementById('nickname').value;
+            if (nickname.trim() !== '') {
+                localStorage.setItem('nickname', nickname);
+                alert('تم تسجيل اسمك المستعار بنجاح');
+                location.reload(); // إعادة تحميل الصفحة لعرض الاسم في قائمة الأعضاء
+            }
+        }
+
+        // تسجيل دخول الأدمن
+        function adminLogin() {
+            const adminPassword = document.getElementById('admin-password').value;
+            if (adminPassword === 'admin123') { // تغيير كلمة المرور حسب الحاجة
+                localStorage.setItem('isAdmin', 'true');
+                document.getElementById('admin-star').style.display = 'inline';
+                alert('تم تسجيل دخول الأدمن بنجاح');
+                closeModal();
+                location.reload(); // إعادة تحميل الصفحة لعرض النجمة بجانب اسم الأدمن
+            } else {
+                alert('كلمة مرور الأدمن غير صحيحة');
+            }
+        }
+
+        // تعديل العضو
+        function openEditModal(member) {
+            document.getElementById('edit-nickname').value = member.name;
+            document.getElementById('edit-image').value = ''; // تنظيف الحقل
+            document.getElementById('image-preview').src = member.image;
+            document.getElementById('editModal').style.display = 'block';
+            window.currentEditingMember = member;
+        }
+
+        // إغلاق نافذة التعديل
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // حفظ تعديلات العضو
+        function saveEdit() {
+            const newNickname = document.getElementById('edit-nickname').value;
+            const newImage = document.getElementById('image-preview').src;
+
+            // تحديث العضو في القائمة
+            window.currentEditingMember.name = newNickname;
+            window.currentEditingMember.image = newImage;
+
+            // تحديث قائمة الأعضاء
+            updateMembersList();
+
+            // إغلاق نافذة التعديل
+            closeEditModal();
+        }
+
+        // ترقية إلى أدمن
+        function promoteToAdmin() {
+            window.currentEditingMember.isAdmin = true;
+            updateMembersList();
+            closeEditModal();
+        }
+
+        // إرسال رسالة خاصة
+        function sendPrivateMessage() {
+            document.getElementById('private-chat-username').textContent = window.currentEditingMember.name;
+            document.getElementById('privateChatModal').style.display = 'block';
+        }
+
+        // إغلاق نافذة الرسائل الخاصة
+        function closePrivateChatModal() {
+            document.getElementById('privateChatModal').style.display = 'none';
+        }
+
+        // إرسال رسالة خاصة إلى المستخدم
+        function sendPrivateMessageToUser() {
+            const message = document.getElementById('private-message-input').value;
+            const privateMessages = document.getElementById('private-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.innerHTML = `<strong>${currentUser}:</strong> ${message}`;
+            privateMessages.appendChild(messageDiv);
+            document.getElementById('private-message-input').value = ''; // تنظيف الحقل النصي
+            privateMessages.scrollTop = privateMessages.scrollHeight; // تمرير الرسائل إلى الأسفل
+        }
+
+        // عرض الرموز التعبيرية
+        function toggleEmojis() {
+            const emojis = document.getElementById('emojis');
+            emojis.style.display = emojis.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // اختيار رمز تعبيري
+        function selectEmoji(emoji) {
+            const input = document.getElementById('message-input');
+            input.value += emoji;
+        }
+
+        // عرض معاينة الصورة
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const preview = document.getElementById('image-preview');
+                preview.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        // التبديل بين الغرف
+        function switchRoom(roomName) {
+            alert(`تم الدخول إلى ${roomName}`);
+            // يمكن إضافة وظيفة تغيير الغرفة هنا
+        }
+    </script>
+</body>
+</html>
